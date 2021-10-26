@@ -26,3 +26,4 @@ btn2 = driver.find_element(By.ID, "njdwd")
 # another example: we can use *= for substring filtering, beginning or ending with also possible...
 # currency = driver.find_element(By.CSS_SELECTOR, 'a[data-modal-header-and-so-on*="selected_currency=USD"]')
 #1111111111111111111111111112222222222222222222222222222222
+#molfjefwef
