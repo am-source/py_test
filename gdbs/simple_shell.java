@@ -3,7 +3,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 public class simple_shell {
 
@@ -35,13 +34,13 @@ public class simple_shell {
     private static void execute(String path, String[] input) {
         int child_pid = fork();
 
-        if (child_pid == 0) { // Kindprozess
+        if (child_pid == 0) { // child process
             execv(path, input);
             exit(0);
-        } else if (child_pid == -1) { // Fehler
+        } else if (child_pid == -1) { // error
             System.err.println("Starten der Anwendung fehlgeschlagen");
             exit(1);
-        } else {
+        } else { // parent process
             int[] status = new int[1];
             waitpid(child_pid, status, 0);
 
@@ -58,7 +57,7 @@ public class simple_shell {
     private String[] handle_input() throws IOException {
         BufferedReader b_reader = new BufferedReader(
                 new InputStreamReader(System.in));
-        return b_reader.readLine().split("\\/|\\\\|\\s+");
+        return b_reader.readLine().split("\\/|\\\\|\\s+"); // \s represents " "
     }
 
     private static void print_prompt() {
@@ -71,14 +70,15 @@ public class simple_shell {
         String[] pathArray = PATH.split(":");
         File file;
         // remove
-        for (String elem : pathArray) {
-            System.out.println(elem);
-        }
+        // for (String elem : pathArray) {
+        // System.out.println(elem);
+        // }
         for (int i = 0; i < pathArray.length; i++) {
-            file = new File(pathArray[i] + "/" + input[0]);
+            String tmp_path = pathArray[i] + "/" + input[0];
+            file = new File(tmp_path);
 
             if (file.isFile() && file.canExecute()) {
-                path = pathArray[i] + "/" + input[0];
+                path = tmp_path;
                 break;
             }
         }
