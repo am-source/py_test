@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class simple_shell {
 
-    private String PATH = System.getenv("PATH"); // + ":./src";
+    private String PATH = System.getenv("PATH");
 
     public static void main(String[] args) throws IOException {
         simple_shell ss = new simple_shell();
@@ -70,6 +70,7 @@ public class simple_shell {
         String path = null;
         String[] pathArray = PATH.split(":");
         File file;
+        // remove
         for (String elem : pathArray) {
             System.out.println(elem);
         }
@@ -81,6 +82,7 @@ public class simple_shell {
                 break;
             }
         }
+        // remove
         System.out.println("path was : " + path);
         return path;
     }
