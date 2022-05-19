@@ -71,12 +71,12 @@ public class simple_shell {
             // check if redirect was used, to restore status
             if (redirected) {
                 if (old_fd_in != null) {
-                    close(STDIN_FILENO);
+                    // close(STDIN_FILENO);
                     dup2(old_fd_in, STDIN_FILENO);
                     close(old_fd_in);
                     old_fd_in = null;
                 } else {
-                    close(STDOUT_FILENO);
+                    // close(STDOUT_FILENO);
                     dup2(old_fd_out, STDOUT_FILENO);
                     close(old_fd_out);
                     old_fd_out = null;
