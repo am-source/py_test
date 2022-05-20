@@ -6,35 +6,57 @@ import java.io.InputStreamReader;
 
 public class simple_shell {
 
-    private String PATH = System.getenv("PATH");
+    private static String PATH = System.getenv("PATH");
     private static Integer old_fd_in;
     private static Integer old_fd_out;
 
     public static void main(String[] args) throws IOException {
-        simple_shell ss = new simple_shell();
 
         Boolean runn_var = true;
 
         while (runn_var) {
+            int[] pipefd = new int[2];
+            int tmp_std_in = STDIN_FILENO; // std_in during pipe loop
+
             print_prompt();
-            String[] input = ss.handle_input();
+            String input = get_input();
             // exit?
-            check_running_condition(input[0], runn_var);
-            // "<" or ">" ?
-            boolean redirected = check_std_redirection(input);
-            if (redirected == true) {
-                input = crop_input_for_redirect(input);
-            }
-            String path = ss.get_executable_file_path(input);
-            // improve following line
-            if (path == null) {
-                System.err.println("Kein ausführbares Programm gefunden!");
-            } else {
-                execute(path, input, redirected);
+            check_running_condition(input, runn_var);
+            // "|" ? -> split input
+            String[] piped_input = handle_pipe_input(input);
+
+            for (int i = 0; i < piped_input.length; i++) {
+                String[] curr_input = split_input(piped_input[i]); // split at " " || "/" || "\"
+                pipe(pipefd);
+
+                // missing pipe part here
+
+                // "<" or ">" ?
+                boolean redirected = check_std_redirection(curr_input);
+                if (redirected == true) {
+                    curr_input = crop_input_for_redirect(curr_input);
+                }
+                String path = get_executable_file_path(curr_input);
+                // improve following line
+                if (path == null) {
+                    System.err.println("Kein ausführbares Programm gefunden!");
+                } else {
+                    execute(path, curr_input, redirected);
+
+                }
 
             }
 
         }
+    }
+
+    private static String[] handle_pipe_input(String tmp_input) {
+        String[] pipe_input = tmp_input.split("\\|");
+        return pipe_input;
+    }
+
+    private static String[] split_input(String tmp_input) {
+        return tmp_input.split("\\/|\\\\|\\s+"); // \s represents " "
     }
 
     private static boolean check_std_redirection(String[] input) {
@@ -85,8 +107,9 @@ public class simple_shell {
         }
     }
 
-    private static void check_running_condition(String input_cmd, Boolean runn_var) {
-        if (input_cmd.equals("exit")) {
+    private static void check_running_condition(String tmp_input, Boolean runn_var) {
+        String[] input_cmd = split_input(tmp_input);
+        if (input_cmd[0].equals("exit")) {
             runn_var = false;
             exit(0);
         }
@@ -99,17 +122,17 @@ public class simple_shell {
         return tmp_input;
     }
 
-    private String[] handle_input() throws IOException {
+    private static String get_input() throws IOException {
         BufferedReader b_reader = new BufferedReader(
                 new InputStreamReader(System.in));
-        return b_reader.readLine().split("\\/|\\\\|\\s+"); // \s represents " "
+        return b_reader.readLine();
     }
 
     private static void print_prompt() {
         System.out.print("Input>>");
     }
 
-    private String get_executable_file_path(String[] input) {
+    private static String get_executable_file_path(String[] input) {
 
         String path = null;
         String[] pathArray = PATH.split(":");
